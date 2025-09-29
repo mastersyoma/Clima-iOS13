@@ -14,9 +14,23 @@ protocol WeatherManagerDelegate {
 }
 
 struct WeatherManager {
-    let weatherURL = "https://api.openweathermap.org/data/2.5/weather?appid=631e17dba34939a01cdd42a4ce0e074f&units=metric"
+    private let baseURL = "https://api.openweathermap.org/data/2.5/weather"
+    private let units = "metric"
     
     var delegate: WeatherManagerDelegate?
+    
+    private var apiKey: String {
+        guard let path = Bundle.main.path(forResource: "Config", ofType: "plist"),
+              let config = NSDictionary(contentsOfFile: path),
+              let key = config["API_KEY"] as? String else {
+            fatalError("API Key not found in Config.plist")
+        }
+        return key
+    }
+    
+    private var weatherURL: String {
+        return "\(baseURL)?appid=\(apiKey)&units=\(units)"
+    }
     
     func fetchWeather(cityName: String) {
         let urlString = "\(weatherURL)&q=\(cityName)"
